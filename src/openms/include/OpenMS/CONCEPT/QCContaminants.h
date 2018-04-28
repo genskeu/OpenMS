@@ -28,26 +28,28 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // --------------------------------------------------------------------------
-// $Maintainer: Leo Wurth$
-// $Authors: Leo Wurth$
+// $Maintainer: Anton Haberland$
+// $Authors: Anton Haberland$
 // --------------------------------------------------------------------------
-#ifndef OPENMS_CONCEPT_QCMS2IdentificationRate_H
-#define OPENMS_CONCEPT_QCMS2IdentificationRate_H
-#include <OpenMS/FORMAT/IdXMLFile.h>
-#include <OpenMS/FORMAT/MzTabFile.h>
-#include <OpenMS/FORMAT/MzTab.h>
-#include <vector>
-#include <utility>
 
-class OPENMS_DLLAPI QCMS2IdentificationRate
+#include<OpenMS/FORMAT/CsvFile.h>
+#include<OpenMS/FORMAT/MzTab.h>
+#include<OpenMS/FORMAT/FASTAFile.h>
+#include<OpenMS/DATASTRUCTURES/String.h>
+#include<utility>
+#include<vector>
+
+class OPENMS_DLLAPI QCContaminants
 {
-std::vector<std::pair<OpenMS::String,std::pair<OpenMS::String,OpenMS::String>>> ivec_;
-  public:
-    QCMS2IdentificationRate(std::vector<std::pair<OpenMS::String,std::pair<OpenMS::String,OpenMS::String>>> files):
-      ivec_(files)
-      {
-      }
-      ~QCMS2IdentificationRate();
-      bool MS2IDRateidentifier(OpenMS::MzTab& mztab);
+public:
+      QCContaminants(/*const std::vector<std::pair<OpenMS::String,OpenMS::CsvFile>>& c, */const std::vector<std::pair<OpenMS::String,std::vector<OpenMS::FASTAFile::FASTAEntry>>>& ff):
+        //cFiles_(c),
+        fFiles_(ff)
+      {}
+      ~QCContaminants();
+      bool QCContaminantCalculator(OpenMS::MzTab&, bool);
+protected:
+      std::vector<std::pair<OpenMS::String,OpenMS::CsvFile>> cFiles_ ;
+      std::vector<std::pair<OpenMS::String,std::vector<OpenMS::FASTAFile::FASTAEntry>>> fFiles_ ;
+
 };
-#endif

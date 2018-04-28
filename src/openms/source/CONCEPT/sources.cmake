@@ -12,6 +12,7 @@ LogConfigHandler.cpp
 LogStream.cpp
 PrecisionWrapper.cpp
 ProgressLogger.cpp
+QCContaminants.cpp
 QCMetrics.cpp
 QCMS2IdentificationRate.cpp
 QCProteinAndPeptideCount.cpp

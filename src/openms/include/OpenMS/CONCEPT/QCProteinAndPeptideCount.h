@@ -15,6 +15,6 @@ std::vector<std::pair<OpenMS::String,OpenMS::CsvFile>> CFile;
       {
       }
     ~QCProteinAndPeptideCount();
-    int ProtAndPepCount( OpenMS::MzTab&);//MetricMap&,MetricMap&) const;
+    bool ProtAndPepCount( OpenMS::MzTab&);//MetricMap&,MetricMap&) const;
 };
 #endif
