@@ -82,21 +82,31 @@ bool QCContaminants::QCContaminantCalculator(MzTab& mztab, bool protAndPepCount)
           break;
         }
       }
-      vector<MzTabOptionalColumnEntry> col;
-      col.push_back(make_pair("opt_isContaminant",finder));
-      it->opt_ = col;
+      MzTabOptionalColumnEntry col;
+      col=make_pair("opt_isContaminant",finder);
+      optvec = it->opt_.push_back(col);
     }
       for(MzTabProteinSectionRows::iterator it = protSecROWS.begin(); it != protSecROWS.end(); it ++)
       {
         MzTabString finder;
         finder.set("-");
+        String wantedSeq;
+        if(it->description.get().hasPrefix("\"DECOY"))
+        {
+          wantedSeq = "\"" + it->description.get().suffix(it->description.get().size()-7);
+          cout<<wantedSeq<< "<-wanted SEQ"<<endl;
+        }
+        else
+        {
+          wantedSeq = it->description.get();
+        }
         for(AllEntrys::iterator itt = entryList.begin(); itt != entryList.end(); itt ++)
         {
           for(vector<FASTAFile::FASTAEntry>::iterator entryIter = itt->begin(); entryIter != itt->end(); entryIter ++ )
           {
             //cout<<it->description.get()<<" <- protein: InhaltMzTab"<<endl;
             //cout<<entryIter->identifier<<" <- protein: InhaltFasta"<<endl;
-            if(it->description.get() == "\""+entryIter-> identifier+"\"" )
+            if(wantedSeq == "\""+entryIter-> identifier+"\"" )
             {
               finder.set("+");
               entryIter  = itt->end();
@@ -108,9 +118,9 @@ bool QCContaminants::QCContaminantCalculator(MzTab& mztab, bool protAndPepCount)
             break;
           }
         }
-        vector<MzTabOptionalColumnEntry> col;
-        col.push_back(make_pair("opt_isContaminant",finder));
-        it->opt_ = col;
+        MzTabOptionalColumnEntry col;
+        col = make_pair("opt_isContaminant",finder);
+        it->opt_.push_back(col);
       }
     mztab.setPeptideSectionRows(pepSecROWS);
     mztab.setProteinSectionRows(protSecROWS);

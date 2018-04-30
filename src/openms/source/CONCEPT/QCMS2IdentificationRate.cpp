@@ -72,7 +72,7 @@ bool QCMS2IdentificationRate::MS2IDRateidentifier( MzTab& mztab)
     {
       throw Exception::MissingInformation(__FILE__,__LINE__,OPENMS_PRETTY_FUNCTION,"invalid order of input rawfiles_FalseDiscoveryRate or input Post_FalseDiscoveryRate Files. The Input Files must have the same order");
     }
-    /*dXMLFile il;
+    IdXMLFile il;
 		vector<PeptideIdentification> pep_ids;
 		vector<ProteinIdentification> prot_ids;
 		il.load(it->second, prot_ids, pep_ids);
@@ -85,8 +85,8 @@ bool QCMS2IdentificationRate::MS2IDRateidentifier( MzTab& mztab)
     Size scount;
     Size ccount;
     Size MS2_spectra_count = exp.getSpectra().size();
-    cout<<"jetzt loadsize"<<endl;
-    mzmlfile.loadTotalSize(it->first,scount,ccount);
+    cout<<"ms2 spectren "<<MS2_spectra_count<<endl;
+    /*mzmlfile.loadTotalSize(it->first,scount,ccount);
     cout<<"alle spectren: "<<scount<<" und alle chromatogram: "<<ccount<<endl;
     double identification_rate = (double)pep_ids.size()/MS2_spectra_count;
     cout<<"spectra MS: "<<MS2_spectra_count<<endl;

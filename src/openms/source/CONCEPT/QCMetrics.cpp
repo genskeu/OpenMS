@@ -44,7 +44,7 @@
 #include <OpenMS/CONCEPT/QCContaminants.h>
 #include <OpenMS/CONCEPT/QCMetrics.h>
 #include <OpenMS/CONCEPT/QCProteinAndPeptideCount.h>
-//#include <OpenMS/CONCEPT/QCMS2IdentificationRate.h>
+#include <OpenMS/CONCEPT/QCMS2IdentificationRate.h>
 #include <vector>
 #include <utility>
 
@@ -64,9 +64,9 @@ MzTabFile mzTabOutputFile;
 MzTab mzTabOutput;
 QCProteinAndPeptideCount ProtAndPepObj(CFiles_);
 bool papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
-/*QCMS2IdentificationRate MS2IDRate(Idxml_);
+QCMS2IdentificationRate MS2IDRate(Idxml_);
 cout<< "->-> Vor Der MS2ID Funktion"<<endl;
-bool mid = MS2IDRate.MS2IDRateidentifier( mzTabOutput);*/
+bool mid = MS2IDRate.MS2IDRateidentifier( mzTabOutput);
 QCContaminants ContaminantsObj(faFile_);
 bool contam = ContaminantsObj.QCContaminantCalculator(mzTabOutput, papc);
 mzTabOutputFile.store(out_,mzTabOutput);

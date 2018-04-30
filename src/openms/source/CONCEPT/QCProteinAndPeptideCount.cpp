@@ -42,14 +42,14 @@ using namespace std;
 QCProteinAndPeptideCount::~QCProteinAndPeptideCount(){
 
 }
-
-bool QCProteinAndPeptideCount::ProtAndPepCount( MzTab& mztab)//MetricMap& outPep ,MetricMap& outProt) const
+//Code sollte noch kommentiert werden. Bin mir auch nicht sicher ob es funktioniert wenn mehrere CSV's für Peptide oder Proteine eingegeben werden
+bool QCProteinAndPeptideCount::ProtAndPepCount( MzTab& mztab)
 {
 vector<CsvFile> CsvFilesProtein;
 vector<CsvFile> CsvFilesPeptide;
 MzTabPeptideSectionRows PepROWS;
 MzTabProteinSectionRows ProtROWS;
-for(vector<pair<String,CsvFile>>::const_iterator it = CFile.begin();it!=CFile.end();++it)
+for(vector<pair<String,CsvFile>>::const_iterator it = CFile.begin();it!=CFile.end();++it)//befüllt 2 Listen mit CsvFiles. Proteine / Peptide
 {
   if(it->first=="ProteinQuantifier_Peptide")
   {
@@ -60,7 +60,7 @@ for(vector<pair<String,CsvFile>>::const_iterator it = CFile.begin();it!=CFile.en
     CsvFilesProtein.push_back(it->second);
   }
 }
-for(vector<CsvFile>::const_iterator it = CsvFilesPeptide.begin(); it!=CsvFilesPeptide.end();it++)
+for(vector<CsvFile>::const_iterator it = CsvFilesPeptide.begin(); it!=CsvFilesPeptide.end();it++)//extrahiert Informationen der Peptide
 {
   StringList MetaList;
   StringList DataList;
@@ -102,12 +102,12 @@ for(vector<CsvFile>::const_iterator it = CsvFilesPeptide.begin(); it!=CsvFilesPe
     }
     line++;
   }
-  for(StringList::const_iterator it=DataList.begin(); it != DataList.end(); ++it)
+  for(StringList::const_iterator it=DataList.begin(); it != DataList.end(); ++it)//schreibt informationen der peptide in MzTab
   {
     MzTabPeptideSectionRow PepROW;
     MzTabString PepSeq;
     MzTabString MTDiff;
-    MzTabOptionalColumnEntry mTOCE = make_pair("Match_Time_Difference",MTDiff);
+    MzTabOptionalColumnEntry mTOCE = make_pair("opt_Match_Time_Difference",MTDiff);
     vector<MzTabOptionalColumnEntry> optionals;
     optionals.push_back(mTOCE);
     PepROW.opt_= optionals;
@@ -118,7 +118,7 @@ for(vector<CsvFile>::const_iterator it = CsvFilesPeptide.begin(); it!=CsvFilesPe
   }
   mztab.setPeptideSectionRows(PepROWS);
 }
-for(vector<CsvFile>::const_iterator it = CsvFilesProtein.begin(); it!=CsvFilesProtein.end();it++)
+for(vector<CsvFile>::const_iterator it = CsvFilesProtein.begin(); it!=CsvFilesProtein.end();it++)//extrahiert Informationen der Proteine
 {
   StringList MetaList;
   StringList DataList;
@@ -128,8 +128,8 @@ for(vector<CsvFile>::const_iterator it = CsvFilesProtein.begin(); it!=CsvFilesPr
   StringList CurrentRow;
   Size maxRow = fl.rowCount();
   vector<String> rafiles;
-  while(fl.getRow(line,CurrentRow)==false)
-  {
+  while(fl.getRow(line,CurrentRow)==false)//Sucht irgendwelche Infos aus den Metadaten
+  {                                       //rafiles könnten bereits die nötigen Rawfiles besitzen. Kein Plan...hab ich nicht geschrieben
     boost::regex rgx("Rawfiles");
     boost::smatch match;
     bool found = boost::regex_search(CurrentRow[0],match,rgx);
@@ -143,7 +143,7 @@ for(vector<CsvFile>::const_iterator it = CsvFilesProtein.begin(); it!=CsvFilesPr
     }
     line++;
   }
-  while(line<maxRow)
+  while(line<maxRow)                    //geht alle Datenreihen in der CSV durch
   {
     fl.getRow(line,CurrentRow);
     if(CurrentRow[0] == "\"protein\"")
@@ -160,12 +160,12 @@ for(vector<CsvFile>::const_iterator it = CsvFilesProtein.begin(); it!=CsvFilesPr
     }
     line++;
   }
-  for(StringList::const_iterator it=DataList.begin(); it != DataList.end(); ++it)
+  for(StringList::const_iterator it=DataList.begin(); it != DataList.end(); ++it)//schreibt Informationen der Proteine in  MzTab
   {
     MzTabProteinSectionRow ProtROW;
     MzTabString ProtSeq;
     MzTabString MTDiff;
-    MzTabOptionalColumnEntry mTOCE = make_pair("Match_Time_Difference",MTDiff);
+    MzTabOptionalColumnEntry mTOCE = make_pair("opt_Match_Time_Difference",MTDiff);
     vector<MzTabOptionalColumnEntry> optionals;
     optionals.push_back(mTOCE);
     ProtROW.opt_= optionals;
