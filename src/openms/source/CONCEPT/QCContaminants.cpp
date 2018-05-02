@@ -84,28 +84,17 @@ bool QCContaminants::QCContaminantCalculator(MzTab& mztab, bool protAndPepCount)
       }
       MzTabOptionalColumnEntry col;
       col=make_pair("opt_isContaminant",finder);
-      optvec = it->opt_.push_back(col);
+      it->opt_.push_back(col);
     }
       for(MzTabProteinSectionRows::iterator it = protSecROWS.begin(); it != protSecROWS.end(); it ++)
       {
         MzTabString finder;
         finder.set("-");
-        String wantedSeq;
-        if(it->description.get().hasPrefix("\"DECOY"))
-        {
-          wantedSeq = "\"" + it->description.get().suffix(it->description.get().size()-7);
-          cout<<wantedSeq<< "<-wanted SEQ"<<endl;
-        }
-        else
-        {
-          wantedSeq = it->description.get();
-        }
+        String wantedSeq = it->description.get();
         for(AllEntrys::iterator itt = entryList.begin(); itt != entryList.end(); itt ++)
         {
           for(vector<FASTAFile::FASTAEntry>::iterator entryIter = itt->begin(); entryIter != itt->end(); entryIter ++ )
           {
-            //cout<<it->description.get()<<" <- protein: InhaltMzTab"<<endl;
-            //cout<<entryIter->identifier<<" <- protein: InhaltFasta"<<endl;
             if(wantedSeq == "\""+entryIter-> identifier+"\"" )
             {
               finder.set("+");
