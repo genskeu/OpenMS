@@ -49,7 +49,7 @@ Int main()
 
   // iterate between range
   MSSpectrum::Iterator it;
-  for (it = spectrum.MZBegin(800.0); it != spectrum.MZEnd(1000.0); ++it)
+  for (it = spectrum.MZBegin(700.0); it != spectrum.MZEnd(1000.0); ++it)
   {
     cout << it->getMZ() << endl;
   }

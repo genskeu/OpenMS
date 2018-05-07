@@ -67,6 +67,8 @@
 #include <OpenMS/DATASTRUCTURES/DPosition.h>
 #include <OpenMS/DATASTRUCTURES/DBoundingBox.h>
 
+#include <OpenMS/KERNEL/MassTrace.h>
+
 //Contrib includes
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -241,7 +243,7 @@ public:
     {
       MultiplexDeltaMassesGenerator generator;
       Param p = generator.getParameters();
-      
+
       for (Param::ParamIterator it = p.begin(); it != p.end(); ++it)
       {
         defaults.setValue(it->name, it->value, it->description, ListUtils::create<String>("advanced"));
@@ -314,12 +316,12 @@ public:
   void getParameters_labels_()
   {
     Param p = getParam_();
-    
+
     // create map of pairs (label as string, mass shift as double)
     for (Param::ParamIterator it = p.begin(); it != p.end(); ++it)
     {
       label_mass_shift_.insert(make_pair(it->name, it->value));
-    }    
+    }
   }
 
   /**
@@ -331,13 +333,13 @@ public:
   {
     std::vector<std::vector<String> > samples_labels;
     std::vector<String> temp_samples;
-    
+
     String labels(labels_);
     boost::replace_all(labels, "[]", "no_label");
     boost::replace_all(labels, "()", "no_label");
     boost::replace_all(labels, "{}", "no_label");
     boost::split(temp_samples, labels, boost::is_any_of("[](){}")); // any bracket allowed to separate samples
-    
+
     for (unsigned i = 0; i < temp_samples.size(); ++i)
     {
       if (!temp_samples[i].empty())
@@ -356,7 +358,7 @@ public:
         }
       }
     }
-    
+
     if (samples_labels.empty())
     {
       vector<String> temp_labels;
@@ -430,9 +432,9 @@ public:
         list.push_back(pattern);
       }
     }
-    
+
     sort(list.begin(),list.end(),less_pattern);
-    
+
     return list;
   }
 
@@ -664,6 +666,38 @@ public:
           for (unsigned peak = 0; peak < isotopes_per_peptide_max_; ++peak)
           {
             std::pair<unsigned, unsigned> peptide_peak(peptide, peak);
+
+            if (peak == 0)
+            {
+              Peak2D peak1;
+              peak1.setMZ(200);
+              peak1.setRT(1);
+              peak1.setIntensity(20);
+              Peak2D peak2;
+              peak2.setMZ(1200);
+              peak2.setRT(3);
+              peak2.setIntensity(50);
+
+              Peak2D peak3;
+              peak3.setMZ(200);
+              peak3.setRT(5);
+              peak3.setIntensity(20);
+
+              Peak2D peak4(10,100);
+
+
+              std::list<Peak2D> peaks_exp;
+              peaks_exp.push_back(peak1);
+              peaks_exp.push_back(peak2);
+              peaks_exp.push_back(peak3);
+
+
+              MassTrace mastrace1stpeak(peaks_exp);
+              //mastrace1stpeak(mass_traces[peptide_peak])
+              mastrace1stpeak.estimateFWHM();
+              feature.setWidth(peak4.getRT());
+            }
+
             if (mass_traces.count(peptide_peak) > 0)
             {
               ConvexHull2D hull;
@@ -698,7 +732,7 @@ public:
     // (for each sample a list of (label string, mass shift) pairs)
     // for example triple-SILAC: [(none,0)][(Lys4,4.0251),(Arg6,6.0201)][Lys8,8.0141)(Arg10,10.0082)]
     std::vector<std::vector<std::pair<String, double> > > labels;
-    
+
     for (unsigned sample = 0; sample < samples_labels_.size(); ++sample)
     {
       // The labels are required to be ordered in mass shift.
@@ -737,7 +771,7 @@ public:
     // add results from  analysis
     LOG_DEBUG << "Generating output mzQuantML file..." << endl;
     ConsensusMap numap(consensus_map);
-    
+
     //calculate ratios
     for (ConsensusMap::iterator cit = numap.begin(); cit != numap.end(); ++cit)
     {
@@ -1000,7 +1034,7 @@ private:
     }
     generator.printSamplesLabelsList();
     generator.printDeltaMassesList();
-    
+
     std::vector<MultiplexDeltaMasses> masses = generator.getDeltaMassesList();
     std::vector<MultiplexIsotopicPeakPattern> patterns = generatePeakPatterns_(charge_min_, charge_max_, isotopes_per_peptide_max_, masses);
 
