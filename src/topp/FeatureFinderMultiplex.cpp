@@ -559,6 +559,9 @@ public:
         // First index is the peptide, second is the mass trace within the peptide.
         std::map<std::pair<unsigned, unsigned>, DBoundingBox<2> > mass_traces;
 
+        // real masstrace of monoisotopic peaks
+        std::vector<std::vector<Peak2D> > mass_traces_mono(number_of_peptides,std::vector<Peak2D>());
+
         GridBasedCluster cluster = cluster_it->second;
         std::vector<int> points = cluster.getPoints();
 
@@ -594,6 +597,16 @@ public:
                   std::pair<unsigned, unsigned> peptide_peak(peptide, peak);
                   mass_traces[peptide_peak].enlarge(rt, result_peak.getMZ() + mz_shift);
                 }
+                // Info ueber RT und Intensity als 2DPeak extrahieren und in echter mass trace speichern, nur bei Peak = 0?
+                if (peak == 0)
+                {
+                  Peak2D peaktemp;
+                  peaktemp.setRT(rt);
+                  peaktemp.setMZ(result_peak.getMZ());
+                  peaktemp.setIntensity(result_peak.getIntensities()[index]);
+                  mass_traces_mono[peptide].push_back(peaktemp);
+                }
+
               }
             }
           }
@@ -619,6 +632,15 @@ public:
                   {
                     std::pair<unsigned, unsigned> peptide_peak(peptide, peak);
                     mass_traces[peptide_peak].enlarge(rt, result_raw.getMZ() + mz_shift);
+                  }
+                  // Info ueber RT und Intensity als 2DPeak extrahieren und in echter mass trace speichern, nur bei Peak = 0?
+                  if (peak == 0)
+                  {
+                    Peak2D peaktemp;
+                    peaktemp.setRT(rt);
+                    peaktemp.setMZ(result_peak.getMZ());
+                    peaktemp.setIntensity(result_peak.getIntensities()[index]);
+                    mass_traces_mono[peptide].push_back(peaktemp);
                   }
                 }
               }
@@ -663,40 +685,14 @@ public:
           feature.setIntensity(peptide_intensities[peptide]);
           feature.setCharge(patterns[pattern].getCharge());
           feature.setOverallQuality(1 - 1 / points.size());
+
+          MassTrace mt_temp(mass_traces_mono[peptide]);
+          feature.setWidth(mt_temp.estimateFWHM() );
+
+
           for (unsigned peak = 0; peak < isotopes_per_peptide_max_; ++peak)
           {
             std::pair<unsigned, unsigned> peptide_peak(peptide, peak);
-
-            if (peak == 0)
-            {
-              Peak2D peak1;
-              peak1.setMZ(200);
-              peak1.setRT(1);
-              peak1.setIntensity(20);
-              Peak2D peak2;
-              peak2.setMZ(1200);
-              peak2.setRT(3);
-              peak2.setIntensity(50);
-
-              Peak2D peak3;
-              peak3.setMZ(200);
-              peak3.setRT(5);
-              peak3.setIntensity(20);
-
-              Peak2D peak4(10,100);
-
-
-              std::list<Peak2D> peaks_exp;
-              peaks_exp.push_back(peak1);
-              peaks_exp.push_back(peak2);
-              peaks_exp.push_back(peak3);
-
-
-              MassTrace mastrace1stpeak(peaks_exp);
-              //mastrace1stpeak(mass_traces[peptide_peak])
-              mastrace1stpeak.estimateFWHM();
-              feature.setWidth(peak4.getRT());
-            }
 
             if (mass_traces.count(peptide_peak) > 0)
             {
