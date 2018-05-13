@@ -68,6 +68,7 @@ protected:
 	  registerInputFileList_("in_Post_FalseDiscoveryRate","<files>", StringList(), "Input files",false,false);
 	  registerInputFileList_("in_FeatureLinkerUnlabeledQT","<files>", StringList(), "Input files",false,false);
     registerInputFileList_("in_Contaminant_DataBase","<files>",StringList(), "Input files",false,false);
+    registerInputFileList_("in_FeatureFinderMulitplex","<files>",StringList(), "Input files",false,false);
     setValidFormats_("in_ProteinQuantifierPeptide", ListUtils::create<String>("csv"));
 	  setValidFormats_("in_ProteinQuantifierProtein", ListUtils::create<String>("csv"));
 	  setValidFormats_("in_IDMapper", ListUtils::create<String>("FeatureXML"));
@@ -75,6 +76,7 @@ protected:
 	  setValidFormats_("in_Post_FalseDiscoveryRate", ListUtils::create<String>("IdXML"));
 	  setValidFormats_("in_FeatureLinkerUnlabeledQT", ListUtils::create<String>("consensusXML"));
     setValidFormats_("in_Contaminant_DataBase", ListUtils::create<String>("Fasta"));
+    setValidFormats_("in_FeatureFinderMulitplex", ListUtils::create<String>("FeatureXML"));
 	  registerOutputFile_("out", "<file>", "", "Output file (mzTab)", true);
     setValidFormats_("out", ListUtils::create<String>("tsv"));
   }
@@ -88,7 +90,9 @@ protected:
     StringList ins_Post_FalseDiscoveryRate = getStringList_("in_Post_FalseDiscoveryRate");
     StringList ins_FeatureLinkerUnlabeledQT = getStringList_("in_FeatureLinkerUnlabeledQT");
     StringList ins_Contaminant_DataBase = getStringList_("in_Contaminant_DataBase");
+    StringList ins_FeatureFinderMulitplex = getStringList_("in_FeatureFinderMulitplex");
     String out = getStringOption_("out");
+    vector<FeatureMap> ffmvec;
     vector<pair<String,FeatureMap>> fvec;
     vector<pair<String,CsvFile>> cvec;
     vector <pair<String,ConsensusMap>> CMapVec;
@@ -155,6 +159,18 @@ protected:
         faFiles.push_back( make_pair("Contaminant_DataBase",entryObj) );
       }
     }
+
+    if (ins_FeatureFinderMulitplex.size()!=0)
+		{
+      vector<String> ffmrawfiles;
+		  for(StringList::const_iterator it=ins_FeatureFinderMulitplex.begin();it!=ins_FeatureFinderMulitplex.end();++it)
+			{
+			  FeatureMap features;
+			  FeatureXMLFile().load(*it, features);
+        ffmvec.push_back(features);
+	    }
+    }
+
 		Metrics metricObj(fvec,ivec,cvec,CMapVec,faFiles,out);
 	    metricObj.runAllMetrics();
   return EXECUTION_OK;

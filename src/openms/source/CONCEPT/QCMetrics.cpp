@@ -45,6 +45,7 @@
 #include <OpenMS/CONCEPT/QCMetrics.h>
 #include <OpenMS/CONCEPT/QCProteinAndPeptideCount.h>
 #include <OpenMS/CONCEPT/QCMS2IdentificationRate.h>
+#include <OpenMS/CONCEPT/QCRTPeakWidth.h>
 #include <vector>
 #include <utility>
 
@@ -69,6 +70,11 @@ cout<< "->-> Vor Der MS2ID Funktion"<<endl;
 bool mid = MS2IDRate.MS2IDRateidentifier( mzTabOutput);
 QCContaminants ContaminantsObj(faFile_);
 bool contam = ContaminantsObj.QCContaminantCalculator(mzTabOutput, papc);
+
+QCRTPeakWidth PeakWithobj(FeatMapsFFM_);
+int rtpw = PeakWithobj.RTPeakWidth( mzTabOutput);
+
+
 mzTabOutputFile.store(out_,mzTabOutput);
 }
 
