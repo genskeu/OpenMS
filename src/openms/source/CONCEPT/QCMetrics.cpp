@@ -45,6 +45,8 @@
 #include <OpenMS/CONCEPT/QCMetrics.h>
 #include <OpenMS/CONCEPT/QCProteinAndPeptideCount.h>
 #include <OpenMS/CONCEPT/QCMS2IdentificationRate.h>
+#include <OpenMS/CONCEPT/QCMBRalignment.h>
+#include <OpenMS/CONCEPT/QCChargeDistribution.h>
 #include <OpenMS/CONCEPT/QCRTPeakWidth.h>
 #include <vector>
 #include <utility>
@@ -64,6 +66,15 @@ void Metrics::runAllMetrics()
 MzTabFile mzTabOutputFile;
 MzTab mzTabOutput;
 QCProteinAndPeptideCount ProtAndPepObj(CFiles_);
+int papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
+//QCMS2IdentificationRate MS2IDRate(Idxml_);
+//int mid = MS2IDRate.MS2IDRateidentifier_( mzTabOutput);
+
+QCMBRalignment MBRAlign(FeatMapsMBR_);
+int mbra = MBRAlign.MBRAlignment( mzTabOutput);
+
+QCChargeDistribution QCCharge(FeatMapsMBR_);
+int cd = QCCharge.ChargeDistribution( mzTabOutput);
 bool papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
 QCMS2IdentificationRate MS2IDRate(Idxml_);
 cout<< "->-> Vor Der MS2ID Funktion"<<endl;
@@ -76,6 +87,7 @@ int rtpw = PeakWithobj.RTPeakWidth( mzTabOutput);
 
 
 mzTabOutputFile.store(out_,mzTabOutput);
+
 }
 
 ////////////////Metrik2: ....................../////////////////////////////////////

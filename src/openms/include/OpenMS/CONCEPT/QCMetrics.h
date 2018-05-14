@@ -57,9 +57,10 @@
     //  gibt an aus welchem TOPPTOOL die Datei kommt.
 
     public:
-        Metrics(const std::vector<std::pair<OpenMS::String,OpenMS::FeatureMap>>& fvec, const std::vector<OpenMS::FeatureMap> ffmvec, const std::vector<std::pair<OpenMS::String,std::pair<OpenMS::String,OpenMS::String>>>& ivec, const std::vector<std::pair<OpenMS::String,OpenMS::CsvFile>>& cvecs,const std::vector<std::pair<OpenMS::String,OpenMS::ConsensusMap>>& CMapVec, const std::vector<std::pair<OpenMS::String,std::vector<OpenMS::FASTAFile::FASTAEntry>>>& fff, const OpenMS::String& out):
+        Metrics(const std::vector<std::pair<OpenMS::String,OpenMS::FeatureMap>>& fvec, const std::vector<OpenMS::FeatureMap> ffmvec, const std::vector<OpenMS::FeatureMap> mbravec, const std::vector<std::pair<OpenMS::String,std::pair<OpenMS::String,OpenMS::String>>>& ivec, const std::vector<std::pair<OpenMS::String,OpenMS::CsvFile>>& cvecs,const std::vector<std::pair<OpenMS::String,OpenMS::ConsensusMap>>& CMapVec, const std::vector<std::pair<OpenMS::String,std::vector<OpenMS::FASTAFile::FASTAEntry>>>& fff, const OpenMS::String& out):
         FeatMaps_(fvec),
         FeatMapsFFM_(ffmvec),
+        FeatMapsMBR_(mbravec),
         Idxml_(ivec),
         CFiles_(cvecs),
         ConsensusMaps_(CMapVec),
@@ -72,6 +73,7 @@
       protected:
         const std::vector<std::pair<OpenMS::String,OpenMS::FeatureMap>> FeatMaps_;			//Alle FeatureXML Datein
         const std::vector<OpenMS::FeatureMap> FeatMapsFFM_; //FeatureXML Datein von FFM
+        const std::vector<OpenMS::FeatureMap> FeatMapsMBR_;			//Alle FeatureXML Datein
         const std::vector<std::pair<OpenMS::String,std::pair<OpenMS::String,OpenMS::String>>> Idxml_;	//Peptide der IDXML's
         const std::vector<std::pair<OpenMS::String,OpenMS::CsvFile>> CFiles_;	//Proteine der CSVFiles's;
         const std::vector<std::pair<OpenMS::String,OpenMS::ConsensusMap>> ConsensusMaps_;    //Alle ConsensusXMLFiles
