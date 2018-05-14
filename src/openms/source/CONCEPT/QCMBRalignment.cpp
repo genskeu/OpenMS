@@ -50,9 +50,9 @@ QCMBRalignment::~QCMBRalignment()
 QCMBRalignment::QCMBRalignment(std::vector<OpenMS::FeatureMap> files):
   maps(files)
   {
-      
-  };
-  
+
+  }
+
 //Main method to write mztab peptide section data needed for MBR alignment plot (PTXQC)
 int QCMBRalignment::MBRAlignment(MzTab& mztab) const
 {
@@ -62,66 +62,65 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
   MzTabPSMSectionRows mztabRows = mztab.getPSMSectionRows();
   vector<MzTabString> unique_ids_;
   int pepIDCount = 0;
-  
+
   //maps = feat_map_;
-   
+
   for (Size m = 0; m < maps.size(); m++)
-  {     
-  
+  {
+
     String rfile;
-    //Keep index of current map for spectra reference 
-    Size run = m; 
-    
-    if (maps[m].metaValueExists("spectra_data")) 
-    {		
-      StringList rfiles = maps[m].getMetaValue("spectra_data");	
+    //Keep index of current map for spectra reference
+    Size run = m;
+
+    if (maps[m].metaValueExists("spectra_data"))
+    {
+      StringList rfiles = maps[m].getMetaValue("spectra_data");
       rfile = rfiles[0];
-    } 
-    
+    }
+
     for (vector<Feature>::const_iterator f_it = maps[m].begin(); f_it!=maps[m].end();f_it++)
     {
 
       vector<PeptideIdentification> pep_id = f_it->getPeptideIdentifications();
-      UInt64 unique_id = f_it->getUniqueId();
- 		  
-      if (pep_id.empty()) 
+
+      if (pep_id.empty())
       {
         //If we want to write empty lines peptide_data_ for features with retention times
-        //	
+        //
       }
- 				
-      else 
+
+      else
       {
         //Iterate over peptide hits of a feature and write data into mztab
-        //In case of 2 and more hits take the first one 
- 	    for (vector<PeptideIdentification>::iterator p_it = pep_id.begin(); p_it!=pep_id.end(); p_it++) 
+        //In case of 2 and more hits take the first one
+ 	    for (vector<PeptideIdentification>::iterator p_it = pep_id.begin(); p_it!=pep_id.end(); p_it++)
  	    {
  	      pepIDCount++;
  	      MzTabPSMSectionRow row;
  	      MzTabString PepSeq;
           MzTabDouble correctRT;
           MzTabDouble oriRT;
- 		  
- 		  //Set sequence	
-          vector<PeptideHit> hits = p_it->getHits(); 
+
+ 		  //Set sequence
+          vector<PeptideHit> hits = p_it->getHits();
           PeptideHit hit = hits[0];
           AASequence seq = hit.getSequence();
           PepSeq.set(seq.toString());
           row.sequence = PepSeq;
-          
-          //Set corrected RTs 
-          float corrRT = f_it->getRT(); 
+
+          //Set corrected RTs
+          float corrRT = f_it->getRT();
           correctRT.set(corrRT);
           vector<MzTabDouble> cRTs;
           cRTs.push_back (correctRT);
           MzTabDoubleList listC;
           listC.set(cRTs);
           row.retention_time = listC;
-          
+
     	  float orRT;
     	  if (p_it->metaValueExists("original_RT")) {orRT = p_it->getMetaValue("original_RT");}
  	      else {throw "Retention time was not written in the feature.";}
- 	      
+
  	      //Set spectrum reference
     	  String spectrum_ref = p_it->getMetaValue("spectrum_reference");
     	  const String& const_spec = spectrum_ref;
@@ -131,34 +130,34 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
     	  spec_ref.setSpecRef(spectrum_ref);
     	  spec_ref.setSpecRefFile(const_spec);
     	  row.spectra_ref = spec_ref;
-    	      	  
+
     	  //Set optional columns: original RT and source file
     	  String ori = to_string(orRT);
           MzTabOptionalColumnEntry oRT = make_pair("opt_original_retention_time",MzTabString(ori));
           vector<MzTabOptionalColumnEntry> v;
           v.push_back (oRT);
-          
+
           UInt64 id = f_it->getUniqueId();
           MzTabOptionalColumnEntry u_id = make_pair("opt_unique_id",MzTabString(id));
           v.push_back (u_id);
           unique_ids_.push_back (MzTabString(id));
-                
+
           MzTabOptionalColumnEntry sraw = make_pair("opt_raw_source_file",MzTabString(rfile));
           v.push_back (sraw);
           row.opt_ = v;
-                
+
           rows.push_back(row);
-    	  		
-         }   
+
+         }
  	  }
- 	    
- 	}			
-    		
+
+ 	}
+
   }
   //Write unique ids from existing mztab data structure passed to the constructor
   vector<MzTabString> ids_;
-  for(vector<MzTabPSMSectionRow>::const_iterator it = mztabRows.begin();it!=mztabRows.end();++it) 
-  { 
+  for(vector<MzTabPSMSectionRow>::const_iterator it = mztabRows.begin();it!=mztabRows.end();++it)
+  {
     vector<MzTabOptionalColumnEntry> opt = it->opt_;
     for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = opt.begin();o_it!=opt.end();++o_it)
     {
@@ -168,33 +167,33 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
         }
     }
   }
-  
+
   //Merge new lines and existing lines. Based on unique ids (UniqueIdInterface)
   //If PSM section was not written before: append rows
-  
-  if (ids_.empty()) 
+
+  if (ids_.empty())
   {
-    mztab.setPSMSectionRows(rows); 
+    mztab.setPSMSectionRows(rows);
   }
   //Else: append rows
   //If unique ids are equal: append columns (relevant for metric)
   //If not: insert unique id in dictionary and add new line to mztab
   else
-  { 
+  {
     //Assign vectors for accurate merging
     vector<MzTabString> ids;
     vector<MzTabString> unique_ids;
     if (ids_.size() < unique_ids_.size())
     {
       ids = ids_;
-      unique_ids = unique_ids_;   
-    } 
-    else 
+      unique_ids = unique_ids_;
+    }
+    else
     {
       ids = unique_ids_;
       unique_ids = ids_;
     }
-    
+
     for (unsigned i = 0; i < unique_ids.size(); i++)
     {
       if (ids[i].toCellString().compare(unique_ids[i].toCellString())==0)
@@ -212,11 +211,11 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
         }
         mz_r.opt_ = v;
         mztabRows[i] = mz_r;
-        
+
       }
-      else 
+      else
       {
-        
+
         MzTabPSMSectionRows split_f (mztabRows.begin(), mztabRows.begin()+i);
         MzTabPSMSectionRows split_e (mztabRows.begin()+i, mztabRows.end());
         split_f.push_back (rows[i]);
@@ -234,10 +233,10 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
         }
         ids = id_f;
       }
-    
+
     }
-    mztab.setPSMSectionRows(mztabRows);  
-  }    
-  
+    mztab.setPSMSectionRows(mztabRows);
+  }
+
   return rows.size()!=0 ? 1:0;
 }

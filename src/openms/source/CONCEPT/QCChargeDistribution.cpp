@@ -50,9 +50,9 @@ QCChargeDistribution::~QCChargeDistribution()
 QCChargeDistribution::QCChargeDistribution(std::vector<OpenMS::FeatureMap> files):
   maps(files)
   {
-      
-  };
-  
+
+  }
+
 //Main method to write mztab peptide section data needed for charge distribution plot (PTXQC)
 int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
 {
@@ -62,26 +62,26 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
 
   int pepIDCount = 0;
   int featCount = 0;
-   
+
   for (unsigned long m = 0; m < maps.size(); m++)
-  {     
-  
+  {
+
     String rfile;
-    
-    if (maps[m].metaValueExists("spectra_data")) 
-    {		
-      StringList rfiles = maps[m].getMetaValue("spectra_data");	
+
+    if (maps[m].metaValueExists("spectra_data"))
+    {
+      StringList rfiles = maps[m].getMetaValue("spectra_data");
       rfile = rfiles[0];
-    } 
-    
+    }
+
     for (vector<Feature>::const_iterator f_it = maps[m].begin(); f_it!=maps[m].end();f_it++)
     {
 
-      vector<PeptideIdentification> pep_id = f_it->getPeptideIdentifications();	
- 		  
-      if (pep_id.empty()) 
+      vector<PeptideIdentification> pep_id = f_it->getPeptideIdentifications();
+
+      if (pep_id.empty())
       {
-        //Empty lines of psm_data_ for features with ion charge	
+        //Empty lines of psm_data_ for features with ion charge
         MzTabPSMSectionRow row;
         MzTabInteger charge;
         int ch = f_it->getCharge();
@@ -91,23 +91,23 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
         UInt64 id = f_it->getUniqueId();
         unique_ids_.push_back (MzTabString(id));
         featCount++;
-        
+
       }
- 				
-      else 
+
+      else
       {
- 	    for (vector<PeptideIdentification>::iterator p_it = pep_id.begin(); p_it!=pep_id.end(); p_it++) 
+ 	    for (vector<PeptideIdentification>::iterator p_it = pep_id.begin(); p_it!=pep_id.end(); p_it++)
  	    {
  	      pepIDCount++;
  	      MzTabPSMSectionRow row;
  	      MzTabInteger charge;
- 		  
+
  		  //Set charge and raw file
           int ch = f_it->getCharge();
           charge.set(ch);
           row.charge = charge;
-          
-          vector<MzTabOptionalColumnEntry> v;  
+
+          vector<MzTabOptionalColumnEntry> v;
           MzTabString name = MzTabString(rfile);
           MzTabOptionalColumnEntry sraw = make_pair("opt_raw_source_file",name);
           v.push_back (sraw);
@@ -116,20 +116,20 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
           v.push_back (u_id);
           unique_ids_.push_back (MzTabString(id));
           row.opt_ = v;
-          
+
           rows.push_back(row);
 
-    	  		
-         }   
+
+         }
  	  }
- 	    
- 	}			
-    		
+
+ 	}
+
   }
   //Write unique ids from existing mztab data structure passed to the constructor
   vector<MzTabString> ids_;
-  for(vector<MzTabPSMSectionRow>::const_iterator it = mztabRows.begin();it!=mztabRows.end();++it) 
-  { 
+  for(vector<MzTabPSMSectionRow>::const_iterator it = mztabRows.begin();it!=mztabRows.end();++it)
+  {
     vector<MzTabOptionalColumnEntry> opt = it->opt_;
     for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = opt.begin();o_it!=opt.end();++o_it)
     {
@@ -141,7 +141,7 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
   }
   //Merge new lines and existing lines. Based on unique ids (UniqueIdInterface)
   //If PSM section was not written from features before: append rows
-  if (ids_.empty()) 
+  if (ids_.empty())
   {
     mztab.setPSMSectionRows(rows); //PSM
   }
@@ -149,16 +149,16 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
   //If unique ids are equal: append column (charge)
   //If not: insert unique id in dictionary and add new line to mztab
   else
-  {  
+  {
     //Assign vectors for accurate merging
     vector<MzTabString> ids;
     vector<MzTabString> unique_ids;
     if (ids_.size() < unique_ids_.size())
     {
       ids = ids_;
-      unique_ids = unique_ids_;   
-    } 
-    else 
+      unique_ids = unique_ids_;
+    }
+    else
     {
       ids = unique_ids_;
       unique_ids = ids_;
@@ -172,9 +172,9 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
         MzTabInteger charge = r.charge;
         mz_r.charge = charge;
         mztabRows[i] = mz_r;
-        
+
       }
-      else 
+      else
       {
         MzTabPSMSectionRows split_f (mztabRows.begin(), mztabRows.begin()+i);
         MzTabPSMSectionRows split_e (mztabRows.begin()+i, mztabRows.end());
@@ -194,8 +194,8 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
         ids = id_f;
       }
     }
-    mztab.setPSMSectionRows(mztabRows);  
-  }  
-  
+    mztab.setPSMSectionRows(mztabRows);
+  }
+
   return rows.size()!=0 ? 1:0;
 }

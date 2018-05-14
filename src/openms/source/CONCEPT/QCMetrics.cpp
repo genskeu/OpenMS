@@ -65,20 +65,22 @@ void Metrics::runAllMetrics()
 ////////////////Metrik1: Protein And Peptide Count /////////////////////////////////
 MzTabFile mzTabOutputFile;
 MzTab mzTabOutput;
+
 QCProteinAndPeptideCount ProtAndPepObj(CFiles_);
-int papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
+bool papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
+
 //QCMS2IdentificationRate MS2IDRate(Idxml_);
 //int mid = MS2IDRate.MS2IDRateidentifier_( mzTabOutput);
 
-QCMBRalignment MBRAlign(FeatMapsMBR_);
-int mbra = MBRAlign.MBRAlignment( mzTabOutput);
+//QCMBRalignment MBRAlign(FeatMapsMBR_);
+//int mbra = MBRAlign.MBRAlignment( mzTabOutput);
 
 QCChargeDistribution QCCharge(FeatMapsMBR_);
 int cd = QCCharge.ChargeDistribution( mzTabOutput);
-bool papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
+
 QCMS2IdentificationRate MS2IDRate(Idxml_);
-cout<< "->-> Vor Der MS2ID Funktion"<<endl;
 bool mid = MS2IDRate.MS2IDRateidentifier( mzTabOutput);
+
 QCContaminants ContaminantsObj(faFile_);
 bool contam = ContaminantsObj.QCContaminantCalculator(mzTabOutput, papc);
 
