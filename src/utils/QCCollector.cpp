@@ -171,7 +171,7 @@ protected:
 	    }
     }
 
-		Metrics metricObj(fvec,ivec,cvec,CMapVec,faFiles,out);
+		Metrics metricObj(fvec,ffmvec, ivec,cvec,CMapVec,faFiles,out);
 	    metricObj.runAllMetrics();
   return EXECUTION_OK;
   }

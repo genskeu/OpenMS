@@ -51,7 +51,7 @@ QCRTPeakWidth::QCRTPeakWidth(std::vector<OpenMS::FeatureMap> files):
   maps(files)
   {
 
-  };
+  }
 
 //Main method to write mztab peptide section data needed for MBR alignment plot (PTXQC)
 int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
@@ -61,7 +61,6 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
   MzTabPSMSectionRows rows;
   MzTabPSMSectionRows mztabRows = mztab.getPSMSectionRows();
   vector<MzTabString> unique_ids_;
-  int pepIDCount = 0;
 
   //maps = feat_map_;
 
@@ -69,8 +68,6 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
   {
 
     String rfile;
-    //Keep index of current map for spectra reference
-    Size run = m;
 
     if (maps[m].metaValueExists("spectra_data"))
     {
@@ -84,11 +81,17 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
       MzTabPSMSectionRow row;
 
       MzTabDouble retention_time;
-      retention_time.set(f_it->getRT());
-      row.retention_time = retention_time;
+      float corrRT = f_it->getRT();
+      retention_time.set(corrRT);
+      vector<MzTabDouble> retention_times;
+      retention_times.push_back (retention_time);
 
-      MzTabDouble retention_length;
-      retention_length.set(f_it->getMetaValue("FWHM"));
+      MzTabDoubleList retention_time_mztab;
+      retention_time_mztab.set(retention_times);
+      row.retention_time = retention_time_mztab;
+
+      double retention_length;
+      retention_length = f_it->getMetaValue("FWHM");
 
       UInt64 unique_id = f_it->getUniqueId();
 
@@ -97,11 +100,10 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
     	//Set optional columns: RT length, unique_id and source file
       vector<MzTabOptionalColumnEntry> v;
 
-    	String ori = to_string(retention_length);
-      MzTabOptionalColumnEntry RTlength = make_pair("opt_retention_length",MzTabString(ori));
+      MzTabOptionalColumnEntry RTlength = make_pair("opt_retention_length",MzTabString(retention_length));
       v.push_back (RTlength);
 
-      MzTabOptionalColumnEntry u_id = make_pair("opt_unique_id",MzTabString(id));
+      MzTabOptionalColumnEntry u_id = make_pair("opt_unique_id",MzTabString(unique_id));
       v.push_back (u_id);
 
       MzTabOptionalColumnEntry sraw = make_pair("opt_raw_source_file",MzTabString(rfile));
@@ -112,7 +114,8 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
 
     }
  	}
-}
+  mztab.setPSMSectionRows(rows);
+
 
 
 
