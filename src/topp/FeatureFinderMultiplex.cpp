@@ -597,7 +597,8 @@ public:
                   std::pair<unsigned, unsigned> peptide_peak(peptide, peak);
                   mass_traces[peptide_peak].enlarge(rt, result_peak.getMZ() + mz_shift);
                 }
-                // Info ueber RT und Intensity als 2DPeak extrahieren und in echter mass trace speichern, nur bei Peak = 0?
+                // Info ueber RT und Intensity als 2DPeak extrahieren und in echter mass trace speichern um Retention length zu berechnen (FWHM)
+                // nur bei Peak = 0 (sollte der monoisotopische Peak sein)
                 if (peak == 0)
                 {
                   Peak2D peaktemp;
@@ -633,7 +634,8 @@ public:
                     std::pair<unsigned, unsigned> peptide_peak(peptide, peak);
                     mass_traces[peptide_peak].enlarge(rt, result_raw.getMZ() + mz_shift);
                   }
-                  // Info ueber RT und Intensity als 2DPeak extrahieren und in echter mass trace speichern, nur bei Peak = 0?
+                  // Info ueber RT und Intensity als 2DPeak extrahieren und in echter mass trace speichern um Retention length zu berechnen (FWHM)
+                  // nur bei Peak = 0 (sollte der monoisotopische Peak sein)
                   if (peak == 0)
                   {
                     Peak2D peaktemp;
@@ -686,8 +688,9 @@ public:
           feature.setCharge(patterns[pattern].getCharge());
           feature.setOverallQuality(1 - 1 / points.size());
 
+          //fuege retention length als FWHM zu jedem feature hinzu
           MassTrace mt_temp(mass_traces_mono[peptide]);
-          feature.setWidth(mt_temp.estimateFWHM() );
+          feature.setWidth( mt_temp.estimateFWHM() );
 
 
           for (unsigned peak = 0; peak < isotopes_per_peptide_max_; ++peak)
