@@ -59,7 +59,7 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
 
   //vector<FeatureMap> maps;
   MzTabPSMSectionRows rows;
-  MzTabPSMSectionRows mztabRows = mztab.getPSMSectionRows();
+  MzTabPSMSectionRows mztabRowsPSM = mztab.getPSMSectionRows();
   vector<MzTabString> unique_ids_;
   int pepIDCount = 0;
 
@@ -154,88 +154,98 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
  	}
 
   }
-  //Write unique ids from existing mztab data structure passed to the constructor
-  vector<MzTabString> ids_;
-  for(vector<MzTabPSMSectionRow>::const_iterator it = mztabRows.begin();it!=mztabRows.end();++it)
-  {
-    vector<MzTabOptionalColumnEntry> opt = it->opt_;
-    for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = opt.begin();o_it!=opt.end();++o_it)
-    {
-      if(o_it->first=="opt_unique_id")
-        {
-          ids_.push_back(o_it->second);
-        }
-    }
-  }
+
 
   //Merge new lines and existing lines. Based on unique ids (UniqueIdInterface)
   //If PSM section was not written before: append rows
 
-  if (ids_.empty())
+  if (mztabRowsPSM.empty())
   {
     mztab.setPSMSectionRows(rows);
   }
+
   //Else: append rows
   //If unique ids are equal: append columns (relevant for metric)
   //If not: insert unique id in dictionary and add new line to mztab
   else
   {
-    //Assign vectors for accurate merging
-    vector<MzTabString> ids;
-    vector<MzTabString> unique_ids;
-    if (ids_.size() < unique_ids_.size())
-    {
-      ids = ids_;
-      unique_ids = unique_ids_;
-    }
-    else
-    {
-      ids = unique_ids_;
-      unique_ids = ids_;
-    }
+    // vector saving the rows which are completly new (no id match)
+    vector<MzTabPSMSectionRow> newMZTabrows;
 
-    for (unsigned i = 0; i < unique_ids.size(); i++)
+    for (vector<MzTabPSMSectionRow>::iterator it_mzTab_row = mztabRowsPSM.begin(); it_mzTab_row != mztabRowsPSM.end(); ++it_mzTab_row)
     {
-      if (ids[i].toCellString().compare(unique_ids[i].toCellString())==0)
+      //check unique id of mzTab row
+      vector<MzTabOptionalColumnEntry> opt_row_mzTab = it_mzTab_row->opt_;
+      MzTabString UID_mzTab;
+
+      for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = opt_row_mzTab.begin(); o_it != opt_row_mzTab.end();++o_it)
       {
-        MzTabPSMSectionRow mz_r = mztabRows[i];
-        MzTabPSMSectionRow r = rows[i];
-        MzTabString seq = r.sequence;
-        mz_r.sequence = seq;
-        mz_r.retention_time = r.retention_time;
-        mz_r.spectra_ref = r.spectra_ref;
-        vector<MzTabOptionalColumnEntry> v = mz_r.opt_;
-        for (Size i = 0; i < r.opt_.size(); i++)
-        {
-          v.push_back (r.opt_[i]);
-        }
-        mz_r.opt_ = v;
-        mztabRows[i] = mz_r;
-
+        if(o_it->first=="opt_unique_id")
+          {
+            UID_mzTab = o_it->second;
+          }
       }
-      else
+      //if there is no id continue
+      if(UID_mzTab.isNull())
       {
-
-        MzTabPSMSectionRows split_f (mztabRows.begin(), mztabRows.begin()+i);
-        MzTabPSMSectionRows split_e (mztabRows.begin()+i, mztabRows.end());
-        split_f.push_back (rows[i]);
-        for (unsigned t = 0; t < split_e.size(); t++)
-        {
-          split_f.push_back (split_e[t]);
-        }
-        mztabRows = split_f;
-        vector<MzTabString> id_f (ids.begin(), ids.begin()+i);
-        vector<MzTabString> id_e (ids.begin()+i, ids.end());
-        id_f.push_back (unique_ids[i]);
-        for (unsigned t = 0; t < id_e.size(); t++)
-        {
-          id_f.push_back (id_e[t]);
-        }
-        ids = id_f;
+        continue;
       }
 
+      bool inMzTab = FALSE;
+
+      for (vector<MzTabPSMSectionRow>::const_iterator it_new_row = rows.begin(); it_new_row != rows.end(); ++it_new_row)
+      {
+        //check unique id of new rows
+        vector<MzTabOptionalColumnEntry> opt_row_new = it_new_row->opt_;
+        MzTabString UID_new;
+
+
+        for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = opt_row_new.begin(); o_it != opt_row_new.end();++o_it)
+        {
+          if(o_it->first=="opt_unique_id")
+            {
+              UID_new = o_it->second;
+            }
+        }
+        //if there is no id in the new row add row and continue
+        if(UID_new.isNull())
+        {
+          //only add rows with no id once
+          if(it_mzTab_row == mztabRowsPSM.begin()) newMZTabrows.push_back(*it_new_row);
+          continue;
+        }
+
+
+
+        //if id matches combine rows
+        if (UID_mzTab.toCellString().compare(UID_new.toCellString())==0)
+        {
+          inMzTab = TRUE;
+          //add new data from the new row to the exisiting one
+          if(it_mzTab_row->sequence.isNull()){it_mzTab_row->sequence = it_new_row->sequence;}
+          if(it_mzTab_row->retention_time.isNull()){it_mzTab_row->retention_time = it_new_row->retention_time;}
+          if(it_mzTab_row->charge.isNull()){it_mzTab_row->charge = it_new_row->charge;}
+          if(it_mzTab_row->spectra_ref.isNull()){it_mzTab_row->spectra_ref = it_new_row->spectra_ref;}
+          //add all optional columns (does not check for dublicates)
+          for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = it_new_row->opt_.begin(); o_it != it_new_row->opt_.end(); ++o_it)
+          {
+            it_mzTab_row->opt_.push_back(*o_it);
+          }
+        }
+
+        //add new rows with no match
+        if(inMzTab == FALSE && it_new_row == rows.end() )
+        {
+          //no match
+          newMZTabrows.push_back(*it_new_row);
+        }
+      }
     }
-    mztab.setPSMSectionRows(mztabRows);
+    //combine the updated old rows and the new ones
+    vector<MzTabPSMSectionRow> mztabRowsPSMnew = mztabRowsPSM;
+    mztabRowsPSMnew.insert(mztabRowsPSMnew.end(), newMZTabrows.begin() , newMZTabrows.end() );
+    //setPSMSection
+    mztab.setPSMSectionRows(mztabRowsPSMnew);
   }
 
   return rows.size()!=0 ? 1:0;

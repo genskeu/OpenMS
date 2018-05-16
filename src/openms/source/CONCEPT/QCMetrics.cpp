@@ -72,23 +72,28 @@ bool papc = ProtAndPepObj.ProtAndPepCount( mzTabOutput);
 //QCMS2IdentificationRate MS2IDRate(Idxml_);
 //int mid = MS2IDRate.MS2IDRateidentifier_( mzTabOutput);
 
-//QCMBRalignment MBRAlign(FeatMapsMBR_);
-//int mbra = MBRAlign.MBRAlignment( mzTabOutput);
+QCMBRalignment MBRAlign(FeatMapsMBR_);
+int mbra = MBRAlign.MBRAlignment( mzTabOutput);
 
 QCChargeDistribution QCCharge(FeatMapsMBR_);
 int cd = QCCharge.ChargeDistribution( mzTabOutput);
 
+
+/*
 QCMS2IdentificationRate MS2IDRate(Idxml_);
 bool mid = MS2IDRate.MS2IDRateidentifier( mzTabOutput);
 
 QCContaminants ContaminantsObj(faFile_);
 bool contam = ContaminantsObj.QCContaminantCalculator(mzTabOutput, papc);
+*/
 
 QCRTPeakWidth PeakWithobj(FeatMapsFFM_);
 int rtpw = PeakWithobj.RTPeakWidth( mzTabOutput);
 
 
 mzTabOutputFile.store(out_,mzTabOutput);
+
+
 
 }
 
