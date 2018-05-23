@@ -90,13 +90,8 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
       retention_time_mztab.set(retention_times);
       row.retention_time = retention_time_mztab;
 
-      //set column mass to charge
-      MzTabDouble exp_mz;
-      exp_mz.set(f_it->getMZ());
-      row.exp_mass_to_charge = exp_mz;
 
-
-    	//Set optional columns: RT length, unique_id, source file and intensity
+    	//Set optional columns: RT length, unique_id, source file
       vector<MzTabOptionalColumnEntry> v_opt;
 
       double retention_length;
@@ -110,11 +105,6 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
 
       MzTabOptionalColumnEntry sraw = make_pair("opt_raw_source_file",MzTabString(rfile));
       v_opt.push_back (sraw);
-
-      double intensity;
-      intensity = f_it->getIntensity();
-      MzTabOptionalColumnEntry opt_intensity = make_pair("opt_intensity",MzTabString(intensity));
-      v_opt.push_back (opt_intensity);
 
       row.opt_ = v_opt;
 
@@ -192,12 +182,13 @@ int QCRTPeakWidth::RTPeakWidth(MzTab& mztab) const
           if(it_mzTab_row->charge.isNull()){it_mzTab_row->charge = it_new_row->charge;}
           if(it_mzTab_row->spectra_ref.isNull()){it_mzTab_row->spectra_ref = it_new_row->spectra_ref;}
           if(it_mzTab_row->exp_mass_to_charge.isNull()){it_mzTab_row->exp_mass_to_charge = it_new_row->exp_mass_to_charge;}
-
           //add all optional columns (does not check for dublicates)
           for (vector<MzTabOptionalColumnEntry>::const_iterator o_it = it_new_row->opt_.begin(); o_it != it_new_row->opt_.end(); ++o_it)
           {
             it_mzTab_row->opt_.push_back(*o_it);
           }
+          //after one match was found break
+          break;
         }
       }
       //add new rows with no match

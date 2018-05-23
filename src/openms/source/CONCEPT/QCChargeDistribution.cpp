@@ -82,6 +82,7 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
       if (pep_id.empty())
       {
         //Empty lines of psm_data_ for features with ion charge
+        /*
         MzTabPSMSectionRow row;
         MzTabInteger charge;
         int ch = f_it->getCharge();
@@ -91,7 +92,7 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
         UInt64 id = f_it->getUniqueId();
         unique_ids_.push_back (MzTabString(id));
         featCount++;
-
+        */
       }
 
       else
@@ -102,7 +103,7 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
  	      MzTabPSMSectionRow row;
  	      MzTabInteger charge;
 
- 		  //Set charge and raw file
+ 		      //Set charge and raw file
           int ch = f_it->getCharge();
           charge.set(ch);
           row.charge = charge;
@@ -118,6 +119,10 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
           row.opt_ = v;
 
           rows.push_back(row);
+
+          //only take first peptide indetification
+          break;
+
          }
  	  }
 
@@ -199,6 +204,8 @@ int QCChargeDistribution::ChargeDistribution(MzTab& mztab) const
           {
             it_mzTab_row->opt_.push_back(*o_it);
           }
+          //after one match was found break
+          break;
         }
 
         //add new rows with no match

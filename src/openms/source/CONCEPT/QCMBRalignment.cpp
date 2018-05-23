@@ -91,17 +91,17 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
 
       else
       {
-        //Iterate over peptide hits of a feature and write data into mztab
-        //In case of 2 and more hits take the first one
+        //Iterate over peptide identifications of a feature and write data into mztab
+        //In case of 2 and more identifications take only the first one
  	    for (vector<PeptideIdentification>::iterator p_it = pep_id.begin(); p_it!=pep_id.end(); p_it++)
  	    {
- 	      pepIDCount++;
- 	      MzTabPSMSectionRow row;
- 	      MzTabString PepSeq;
+ 	        pepIDCount++;
+ 	        MzTabPSMSectionRow row;
+ 	        MzTabString PepSeq;
           MzTabDouble correctRT;
           MzTabDouble oriRT;
 
- 		  //Set sequence
+ 		      //Set sequence
           vector<PeptideHit> hits = p_it->getHits();
           PeptideHit hit = hits[0];
           AASequence seq = hit.getSequence();
@@ -147,6 +147,9 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
           row.opt_ = v;
 
           rows.push_back(row);
+
+          //only take first peptide indetification
+          break;
 
          }
  	  }
@@ -215,8 +218,6 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
           continue;
         }
 
-
-
         //if id matches combine rows
         if (UID_mzTab.toCellString().compare(UID_new.toCellString())==0)
         {
@@ -231,6 +232,8 @@ int QCMBRalignment::MBRAlignment(MzTab& mztab) const
           {
             it_mzTab_row->opt_.push_back(*o_it);
           }
+          //after one match was found break
+          break;
         }
 
         //add new rows with no match
